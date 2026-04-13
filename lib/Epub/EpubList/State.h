@@ -14,6 +14,7 @@ typedef struct
   uint16_t current_section;
   uint16_t current_page;
   uint16_t pages_in_current_section;
+  uint16_t selected_toc;  // last selected chapter/TOC index
 } EpubListItem;
 
 // this is held in the RTC memory

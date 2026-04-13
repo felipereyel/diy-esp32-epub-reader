@@ -37,4 +37,5 @@ public:
   void next();
   void prev();
   void render();
+  void load_state();
 };

@@ -86,6 +86,18 @@ void handleEpubTableContents(Renderer *renderer, UIAction action, bool needs_red
 {
   if (!contents)
   {
+    // restore saved chapter selection if exists
+    uint16_t saved_toc = epub_list_state.epub_list[epub_list_state.selected_item].selected_toc;
+    ESP_LOGI("main", "Creating TOC for book at index %d, saved_toc=%d", epub_list_state.selected_item, saved_toc);
+    if (saved_toc > 0)
+    {
+      epub_index_state.selected_item = saved_toc;
+      ESP_LOGI("main", "Restoring TOC to saved index: %d", saved_toc);
+    }
+    else
+    {
+      epub_index_state.selected_item = 0;
+    }
     contents = new EpubToc(epub_list_state.epub_list[epub_list_state.selected_item], epub_index_state, renderer);
     contents->set_needs_redraw();
     contents->load();
@@ -99,11 +111,23 @@ void handleEpubTableContents(Renderer *renderer, UIAction action, bool needs_red
     contents->next();
     break;
   case SELECT:
+    // save the selected chapter to state
+    epub_list_state.epub_list[epub_list_state.selected_item].selected_toc = epub_index_state.selected_item;
+    ESP_LOGI("main", "Saving selected_toc=%d", epub_index_state.selected_item);
     // setup the reader state
     ui_state = READING_EPUB;
     // create the reader and load the book
     reader = new EpubReader(epub_list_state.epub_list[epub_list_state.selected_item], renderer);
-    reader->set_state_section(contents->get_selected_toc());
+    // only override section if no saved position (new book selection)
+    if (reader->has_saved_position())
+    {
+      ESP_LOGI("main", "Restoring saved position from file");
+      reader->restore_position();
+    }
+    else
+    {
+      reader->set_state_section(contents->get_selected_toc());
+    }
     reader->load();
     //switch to reading the epub
     delete contents;
@@ -126,6 +150,7 @@ void handleEpubList(Renderer *renderer, UIAction action, bool needs_redraw)
     if (epub_list->load("/fs/"))
     {
       ESP_LOGI("main", "Epub files loaded");
+      epub_list->load_state();
     }
   }
   if (needs_redraw)
@@ -145,6 +170,15 @@ void handleEpubList(Renderer *renderer, UIAction action, bool needs_redraw)
     // switch to reading the epub
     // setup the reader state
     ui_state = SELECTING_TABLE_CONTENTS;
+    // restore saved chapter selection BEFORE creating EpubToc
+    {
+      uint16_t saved_toc = epub_list_state.epub_list[epub_list_state.selected_item].selected_toc;
+      if (saved_toc > 0)
+      {
+        epub_index_state.selected_item = saved_toc;
+        ESP_LOGI("main", "Restoring saved TOC before creating: %d", saved_toc);
+      }
+    }
     // create the reader and load the book
     contents = new EpubToc(epub_list_state.epub_list[epub_list_state.selected_item], epub_index_state, renderer);
     contents->load();
@@ -152,10 +186,11 @@ void handleEpubList(Renderer *renderer, UIAction action, bool needs_redraw)
     handleEpubTableContents(renderer, NONE, true);
     return;
   case NONE:
-  default:
+default:
     // nothing to do
     break;
   }
+
   epub_list->render();
 }
 

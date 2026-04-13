@@ -24,4 +24,7 @@ public:
   void prev();
   void render();
   void set_state_section(uint16_t current_section);
+  void save_state();
+  bool has_saved_position();
+  void restore_position();
 };

@@ -1,4 +1,6 @@
 #include "EpubList.h"
+#include <stdio.h>
+#include <string.h>
 
 #ifndef UNIT_TEST
   #include <esp_log.h>
@@ -191,4 +193,43 @@ void EpubList::render()
   }
   state.previous_selected_item = state.selected_item;
   state.previous_rendered_page = current_page;
+}
+
+void EpubList::load_state()
+{
+  ESP_LOGI(TAG, "Loading reading state from SD");
+  FILE *fp = fopen("/fs/reading_state.bin", "rb");
+  if (!fp)
+  {
+    ESP_LOGI(TAG, "No reading state file found");
+    return;
+  }
+  
+  EpubListItem saved_item;
+  size_t read_size = fread(&saved_item, sizeof(EpubListItem), 1, fp);
+  fclose(fp);
+  
+  if (read_size != 1)
+  {
+    ESP_LOGE(TAG, "Failed to read reading state");
+    return;
+  }
+  
+  ESP_LOGI(TAG, "Loaded state: path=%s, section=%d, page=%d", saved_item.path, saved_item.current_section, saved_item.current_page);
+  
+  for (int i = 0; i < state.num_epubs; i++)
+  {
+    if (strcmp(state.epub_list[i].path, saved_item.path) == 0)
+    {
+      state.selected_item = i;
+      state.epub_list[i].current_section = saved_item.current_section;
+      state.epub_list[i].current_page = saved_item.current_page;
+      state.epub_list[i].selected_toc = saved_item.selected_toc;
+      ESP_LOGI(TAG, "Restored state for epub at index %d: section=%d, page=%d, selected_toc=%d", 
+             i, saved_item.current_section, saved_item.current_page, saved_item.selected_toc);
+      return;
+    }
+  }
+  
+  ESP_LOGI(TAG, "No matching epub found for saved state");
 }

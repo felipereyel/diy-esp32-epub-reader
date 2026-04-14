@@ -147,10 +147,17 @@ void EpubList::render()
       int image_ypos = ypos + PADDING;
       int image_height = cell_height - PADDING * 2;
       int image_width = 2 * image_height / 3;
-      size_t image_data_size = 0;
-      uint8_t *image_data = epub->get_item_contents(epub->get_cover_image_item(), &image_data_size);
-      renderer->draw_image(epub->get_cover_image_item(), image_data, image_data_size, image_xpos, image_ypos, image_width, image_height);
-      free(image_data);
+      std::string cover_item = epub->get_cover_image_item();
+      if (!cover_item.empty())
+      {
+        size_t image_data_size = 0;
+        uint8_t *image_data = epub->get_item_contents(cover_item, &image_data_size);
+        if (image_data)
+        {
+          renderer->draw_image(cover_item, image_data, image_data_size, image_xpos, image_ypos, image_width, image_height);
+          free(image_data);
+        }
+      }
       // draw the title
       int text_xpos = image_xpos + image_width + PADDING;
       int text_ypos = ypos + PADDING / 2;

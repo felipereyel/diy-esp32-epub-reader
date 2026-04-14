@@ -36,7 +36,7 @@ bool JPEGHelper::get_size(const uint8_t *data, size_t data_size, int *width, int
   }
   else
   {
-    ESP_LOGE(TAG, "JPEG Decode failed - %d", res);
+    ESP_LOGD(TAG, "JPEG Decode failed - %d", res);
     return false;
   }
   free(pool);
@@ -80,10 +80,11 @@ bool JPEGHelper::render(const uint8_t *data, size_t data_size, Renderer *rendere
     ESP_LOGI(TAG, "JPEG Decoded - size %d,%d, scale = %f, %f, %d", dec.width, dec.height, x_scale, y_scale, scale_factor);
     jd_decomp(&dec, draw_jpeg_function, scale_factor);
   }
-  else
+else
   {
-    ESP_LOGE(TAG, "JPEG Decode failed - %d", res);
+    ESP_LOGD(TAG, "JPEG Decode failed - %d", res);
   }
+}
   free(pool);
   m_data = nullptr;
   m_data_pos = 0;

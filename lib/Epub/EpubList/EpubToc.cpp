@@ -116,3 +116,8 @@ uint16_t EpubToc::get_selected_toc()
 {
   return epub->get_spine_index_for_toc_index(state.selected_item);
 }
+
+int EpubToc::get_toc_count()
+{
+  return epub->get_toc_items_count();
+}

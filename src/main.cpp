@@ -7,6 +7,7 @@
 #include "EpubList/EpubList.h"
 #include "EpubList/EpubReader.h"
 #include "EpubList/EpubToc.h"
+#include "EpubList/State.h"
 #include <RubbishHtmlParser/RubbishHtmlParser.h>
 #include "boards/Board.h"
 
@@ -41,6 +42,7 @@ RTC_DATA_ATTR EpubTocState epub_index_state;
 
 void handleEpub(Renderer *renderer, UIAction action);
 void handleEpubList(Renderer *renderer, UIAction action, bool needs_redraw);
+void draw_count(Renderer *renderer, const char *text);
 
 static EpubList *epub_list = nullptr;
 static EpubReader *reader = nullptr;
@@ -80,6 +82,12 @@ void handleEpub(Renderer *renderer, UIAction action)
     break;
   }
   reader->render();
+  EpubListItem &book_state = epub_list_state.epub_list[epub_list_state.selected_item];
+  char buf[16];
+  snprintf(buf, sizeof(buf), "%d/%dp", book_state.current_page + 1, book_state.pages_in_current_section);
+  renderer->set_margin_top(0);
+  renderer->draw_text(5, -10, buf, false, false);
+  renderer->set_margin_top(35);
 }
 
 void handleEpubTableContents(Renderer *renderer, UIAction action, bool needs_redraw)
@@ -138,6 +146,9 @@ void handleEpubTableContents(Renderer *renderer, UIAction action, bool needs_red
     break;
   }
   contents->render();
+  char buf[20];
+  snprintf(buf, sizeof(buf), "%d chapters", contents->get_toc_count());
+  draw_count(renderer, buf);
 }
 
 void handleEpubList(Renderer *renderer, UIAction action, bool needs_redraw)
@@ -192,6 +203,9 @@ default:
   }
 
   epub_list->render();
+  char buf[16];
+  snprintf(buf, sizeof(buf), "%d books", epub_list_state.num_epubs);
+  draw_count(renderer, buf);
 }
 
 void handleUserInteraction(Renderer *renderer, UIAction ui_action, bool needs_redraw)
@@ -221,6 +235,13 @@ void draw_battery_level(Renderer *renderer, float voltage, float percentage)
   int xpos = renderer->get_page_width() - text_width - 5;
   int ypos = -10;
   renderer->draw_text(xpos, ypos, buf, false, false);
+  renderer->set_margin_top(35);
+}
+
+void draw_count(Renderer *renderer, const char *text)
+{
+  renderer->set_margin_top(0);
+  renderer->draw_text(5, -10, text, false, false);
   renderer->set_margin_top(35);
 }
 

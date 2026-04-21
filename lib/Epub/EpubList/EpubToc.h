@@ -42,4 +42,5 @@ public:
   void render();
   void set_needs_redraw() { m_needs_redraw = true; }
   uint16_t get_selected_toc();
+  int get_toc_count();
 };

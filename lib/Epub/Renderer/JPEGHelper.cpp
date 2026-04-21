@@ -84,7 +84,6 @@ else
   {
     ESP_LOGD(TAG, "JPEG Decode failed - %d", res);
   }
-}
   free(pool);
   m_data = nullptr;
   m_data_pos = 0;

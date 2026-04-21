@@ -214,20 +214,13 @@ void handleUserInteraction(Renderer *renderer, UIAction ui_action, bool needs_re
 // TODO - add the battery level
 void draw_battery_level(Renderer *renderer, float voltage, float percentage)
 {
-  // clear the margin so we can draw the battery in the right place
   renderer->set_margin_top(0);
-  int width = 40;
-  int height = 20;
-  int margin_right = 5;
-  int margin_top = 10;
-  int xpos = renderer->get_page_width() - width - margin_right;
-  int ypos = margin_top;
-  int percent_width = width * percentage / 100;
-  renderer->fill_rect(xpos, ypos, width, height, 255);
-  renderer->fill_rect(xpos + width - percent_width, ypos, percent_width, height, 0);
-  renderer->draw_rect(xpos, ypos, width, height, 0);
-  renderer->fill_rect(xpos - 4, ypos + height / 4, 4, height / 2, 0);
-  // put the margin back
+  char buf[8];
+  snprintf(buf, sizeof(buf), "%d%%", (int)percentage);
+  int text_width = renderer->get_text_width(buf);
+  int xpos = renderer->get_page_width() - text_width - 5;
+  int ypos = -10;
+  renderer->draw_text(xpos, ypos, buf, false, false);
   renderer->set_margin_top(35);
 }
 

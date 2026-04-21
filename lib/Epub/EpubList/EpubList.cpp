@@ -183,7 +183,7 @@ void EpubList::render()
     // clear the selection box around the previous selected item
     if (state.previous_selected_item == i)
     {
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 3; i++)
       {
         renderer->draw_rect(i, ypos + PADDING / 2 + i, renderer->get_page_width() - 2 * i, cell_height - PADDING - 2 * i, 255);
       }
@@ -191,7 +191,7 @@ void EpubList::render()
     // draw the selection box around the current selection
     if (state.selected_item == i)
     {
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 3; i++)
       {
         renderer->draw_rect(i, ypos + PADDING / 2 + i, renderer->get_page_width() - 2 * i, cell_height - PADDING - 2 * i, 0);
       }
